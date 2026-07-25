@@ -123,10 +123,16 @@ $BuiltExe = @(
 
 Copy-Item -Force $BuiltExe (Join-Path $OutDir "APP_EXE")
 <<<<<<< HEAD
-# MSVC: WebView2Loader is statically linked into the exe — do not copy the DLL.
-# GNU-only builds still need WebView2Loader.dll beside the exe (avoid for portable single-exe).
+<<<<<<< HEAD
+# Required: WebView2Loader.dll must sit next to the exe or Windows reports it missing.
+$Loader = Join-Path $ReleaseDir "WebView2Loader.dll"
+if (Test-Path $Loader) {
+    Copy-Item -Force $Loader (Join-Path $OutDir "WebView2Loader.dll")
+}
 =======
->>>>>>> c9524f7612a70f7123ffb4b434e8a630015a0620
+>>>>>>> 99137f7bc5c20b9185edadd7027bd7ddfc401e02
+=======
+>>>>>>> deea8f9624ed6f0d63e1d0b0c5d6dc6a41541d44
 ```
 
 ## Rust (non-Tauri)
