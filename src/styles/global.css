@@ -1,0 +1,134 @@
+:root {
+  --bg-top: #e8eef2;
+  --bg-bottom: #f7f4ef;
+  --ink: #1a242e;
+  --muted: #5a6874;
+  --accent: #0f6b5c;
+  --error: #9b2c2c;
+  --field-gap: 1.25rem;
+  --font-display: 'Outfit', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(15, 107, 92, 0.12), transparent 55%),
+    linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
+}
+
+.home {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  text-align: center;
+  animation: rise 0.55s ease-out both;
+}
+
+.brand {
+  margin: 0 0 2rem;
+  font-size: clamp(2.5rem, 8vw, 3.75rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  animation: fade-in 0.7s ease-out 0.1s both;
+}
+
+.status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.status-error {
+  color: var(--error);
+  max-width: 28rem;
+}
+
+.ip-fields {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-gap);
+  align-items: center;
+  animation: fade-in 0.55s ease-out 0.15s both;
+}
+
+.flag-row {
+  margin-bottom: 0.25rem;
+}
+
+.country-flag {
+  display: block;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(26, 36, 46, 0.12);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: min(100%, 22rem);
+}
+
+.field dt {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(1.05rem, 3.5vw, 1.35rem);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home,
+  .brand,
+  .ip-fields {
+    animation: none;
+  }
+}
