@@ -121,10 +121,11 @@ export function resolveCountryIsoCode(countryName: string): string | null {
   return countryNameToIsoCode[normalized] ?? null
 }
 
-export function buildCountryFlagUrl(countryName: string): string | null {
+/** CSS class for flag-icons, e.g. `fi fi-us`. */
+export function buildCountryFlagClassName(countryName: string): string | null {
   const isoCode = resolveCountryIsoCode(countryName)
   if (!isoCode) {
     return null
   }
-  return `https://flagcdn.com/48x36/${isoCode}.svg`
+  return `fi fi-${isoCode}`
 }

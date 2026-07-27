@@ -18,9 +18,7 @@ function resolveApiBaseUrl(): string {
   return configured.replace(/\/$/, '')
 }
 
-export async function fetchIpInfo(): Promise<IpInfo> {
-  const response = await fetch(`${resolveApiBaseUrl()}/ip/info`)
-
+async function readIpInfoResponse(response: Response): Promise<IpInfo> {
   if (!response.ok) {
     let detail = `HTTP ${response.status}`
     try {
@@ -35,4 +33,17 @@ export async function fetchIpInfo(): Promise<IpInfo> {
   }
 
   return (await response.json()) as IpInfo
+}
+
+export async function fetchIpInfo(): Promise<IpInfo> {
+  const response = await fetch(`${resolveApiBaseUrl()}/ip/info`)
+  return readIpInfoResponse(response)
+}
+
+export async function fetchIpInfoByAddress(ipAddress: string): Promise<IpInfo> {
+  const trimmed = ipAddress.trim()
+  const response = await fetch(
+    `${resolveApiBaseUrl()}/ip/info/${encodeURIComponent(trimmed)}`,
+  )
+  return readIpInfoResponse(response)
 }

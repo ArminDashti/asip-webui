@@ -1,6 +1,6 @@
 # asip-webui
 
-Minimal production SPA that shows the caller's IP, ASN, AS, and country from the as-ip API.
+Minimal production SPA that shows the caller's IP, ASN, AS, and country from the as-ip API, plus an IP lookup page.
 
 ## Requirements
 
@@ -16,7 +16,10 @@ Minimal production SPA that shows the caller's IP, ASN, AS, and country from the
 
 Copy `.env.example` to `.env` for local overrides. Production builds use `.env.production` (and the Dockerfile build-arg).
 
-The UI calls only: `GET {VITE_AS_IP_BASE_URL}/ip/info`
+| Page | Path | API |
+|------|------|-----|
+| Caller IP | `/` | `GET {VITE_AS_IP_BASE_URL}/ip/info` |
+| IP lookup | `/ip` | `GET {VITE_AS_IP_BASE_URL}/ip/info/{ip}` |
 
 ## Local development
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchIpInfo, type IpInfo } from '../api/asIpClient'
-import { buildCountryFlagUrl } from '../lib/countryFlag'
+import { buildCountryFlagClassName } from '../lib/countryFlag'
 
 type LoadState =
   | { status: 'loading' }
@@ -58,19 +58,13 @@ export function HomePage() {
 }
 
 function CallerIpSummary({ info }: { info: IpInfo }) {
-  const flagUrl = buildCountryFlagUrl(info.country)
+  const flagClassName = buildCountryFlagClassName(info.country)
 
   return (
     <dl className="ip-fields">
-      {flagUrl && (
+      {flagClassName && (
         <div className="flag-row">
-          <img
-            className="country-flag"
-            src={flagUrl}
-            alt=""
-            width={48}
-            height={36}
-          />
+          <span className={`country-flag ${flagClassName}`} aria-hidden="true" />
         </div>
       )}
       <div className="field">

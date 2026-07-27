@@ -62,6 +62,75 @@ body {
   max-width: 28rem;
 }
 
+.ip-lookup-form {
+  width: min(100%, 26rem);
+  margin: 0 0 2rem;
+  text-align: left;
+  animation: fade-in 0.55s ease-out 0.1s both;
+}
+
+.ip-lookup-label {
+  display: block;
+  margin: 0 0 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ip-lookup-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.ip-lookup-input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(26, 36, 46, 0.18);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.ip-lookup-input:focus {
+  outline: 2px solid rgba(15, 107, 92, 0.35);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.ip-lookup-input:disabled {
+  opacity: 0.7;
+}
+
+.ip-lookup-submit {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.ip-lookup-submit:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.ip-lookup-submit:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 .ip-fields {
   margin: 0;
   display: flex;
@@ -76,7 +145,9 @@ body {
 }
 
 .country-flag {
-  display: block;
+  display: inline-block;
+  width: 3rem;
+  line-height: 2.25rem;
   border-radius: 3px;
   box-shadow: 0 1px 0 rgba(26, 36, 46, 0.12);
 }
