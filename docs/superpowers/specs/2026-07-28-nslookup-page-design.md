@@ -1,15 +1,29 @@
 # NSLookup page design
 
 Date: 2026-07-28  
-Status: approved for planning
+Status: approved (revised 2026-07-28 — grid-only UI; API in as-ip)
 
 ## Goal
 
-Add a page at `/nslookup` where a user enters a domain and sees DNS/AS summary fields plus a per-address grid (IP, AS, ASN, Country+Flag) from `GET /api/v1/dns/lookup/{domain}`.
+Ship a working `/nslookup` experience:
+
+1. **as-ip** implements `GET /api/v1/dns/lookup/*domain` (DNS resolve + ASN/country enrichment).
+2. **asip-webui** shows a domain form and a **results grid only** with columns **IP | ASN (name) | AS (number) | Country+Flag**.
 
 ## Approach
 
-Lightweight pathname routing in `App` (no `react-router`). Extend `asIpClient` with a DNS lookup call. New `NslookupPage` mirrors `IpPage` form/state patterns: summary definition list, then an HTML table for `addresses`.
+- Implement the as-ip endpoint per `as-ip/docs/superpowers/specs/2026-07-28-dns-lookup-endpoint-design.md` (Go `net` resolver + existing IP→ASN/geo repository path). Rejected: shelling out to `nslookup`; browser-only resolve + N× `/ip/info` (CORS / fragile).
+- Slim the existing `NslookupPage`: remove the summary `<dl>` (domain/A/NS/CNAME/top-level ASN/AS/country). Keep form + addresses table only.
+- Column mapping (UI label ← API field):
+
+| UI column | API field | Display |
+|-----------|-----------|---------|
+| IP | `ip` | literal address |
+| ASN | `as` | name only (e.g. `EDGECAST`) |
+| AS | `asn` | number only (e.g. `15133`) |
+| Country | `country` | flag (`flag-icons` via existing helper) + country name |
+
+Empty name / zero ASN / empty country → show `—`. Unknown country name → text without flag.
 
 ## Architecture
 
@@ -19,23 +33,21 @@ Browser (/nslookup)
       → NslookupPage
           → asIpClient.fetchDnsLookup(domain)
                GET {VITE_AS_IP_BASE_URL}/dns/lookup/{encodedDomain}
-          → countryFlag helper (top-level country + each address row)
+          → render addresses[] table only
+               → countryFlag helper per row
+
+as-ip
+  GET /api/v1/dns/lookup/*domain
+    → LookupHandler.LookupDns
+    → LookupService.LookupDns (normalize → DNS → enrich addresses)
 ```
 
-## API response (display contract)
+## API contract (consumed by UI)
+
+Full response shape is defined in the as-ip DNS lookup design (includes `a`/`aaaa`/`ns`/`mx`/`txt`/`cname` and top-level `asn`/`as`/`country`). The UI **only uses** `addresses[]`:
 
 ```json
 {
-  "domain": "example.com",
-  "a": ["93.184.216.34"],
-  "aaaa": ["…"],
-  "ns": ["a.iana-servers.net.", "b.iana-servers.net."],
-  "mx": [],
-  "txt": ["…"],
-  "cname": "",
-  "asn": 15133,
-  "as": "EDGECAST",
-  "country": "United States",
   "addresses": [
     {
       "ip": "93.184.216.34",
@@ -47,49 +59,53 @@ Browser (/nslookup)
 }
 ```
 
-**Show:** `domain`, `a`, `ns`, `cname`, top-level `asn` / `as` / `country`, and `addresses[]`.  
-**Omit from UI:** `aaaa`, `mx`, `txt` (still allowed on the typed response).
+Client keeps typing the full response for forward compatibility; display ignores non-address fields.
 
 ## Components
 
 | Unit | Responsibility |
 |------|----------------|
-| `App` | Pathname `/nslookup` → `NslookupPage`; keep `/` and `/ip`; other paths redirect home |
-| `NslookupPage` | Domain form, load/error/ready states, summary + addresses table |
-| `asIpClient.fetchDnsLookup(domain)` | `GET …/dns/lookup/{encodedDomain}` → `DnsLookupResult` |
-| `buildCountryFlagClassName` | Country name → `flag-icons` class |
+| as-ip `LookupDns` (dto/service/handler/router/docs) | New endpoint + enrichment |
+| `asIpClient.fetchDnsLookup` | Already present — verify path matches catch-all URL encoding |
+| `NslookupPage` | Domain form; loading/error/ready; **table only** |
+| `buildCountryFlagClassName` | Country name → `fi fi-xx` |
+| `App` | `/nslookup` route (already present) |
 
 ## Data flow
 
-1. User types domain and submits.
-2. Client validates non-empty trim; otherwise inline error, no API call.
-3. Call `fetchDnsLookup(trimmedDomain)`.
-4. On success: render summary fields, then table rows from `addresses`.
-5. On failure: show API `message` when present, else short fallback.
-
-## UI
-
-- Match existing visual language: centered layout, ASIP brand, form row, mono values.
-- Summary (`<dl>`): Domain, A (join with `, `), NS (join with `, `), CNAME (`—` if empty), ASN, AS, Country + flag.
-- Addresses table columns: **IP | AS | ASN | Country+Flag**. Empty `addresses` → short empty message.
-- No nav links in v1.
+1. User submits non-empty trimmed domain (else inline validation, no request).
+2. `GET …/dns/lookup/{encodedDomain}` (support bare host and URL-like inputs via API normalize).
+3. Success → one row per `addresses[]` entry.
+4. Empty `addresses` → short empty message (API may still 200 with other DNS types; UI still only cares about addresses).
+5. Failure → show API `message` when present.
 
 ## Error handling
 
-- Empty submit → validation message.
-- Non-OK HTTP / network → API `message` or generic error.
-- Unknown country → omit flag; still show country text.
+| Case | Behavior |
+|------|----------|
+| Empty submit | Inline error, no API call |
+| `400` invalid domain | Show API message |
+| `404` no DNS records | Show API message |
+| Network / other | Generic or API message |
+| Missing enrichment | `—` in ASN/AS/Country cells |
 
 ## Out of scope
 
 - React Router / nav chrome
-- Displaying `aaaa`, `mx`, `txt`
+- Showing A/NS/MX/TXT/CNAME or top-level summary on the page
+- Custom DNS server parameter
 - Lookup history / batch domains
-- Changing home or `/ip` behavior
+- Changing `/` or `/ip` behavior
 
-## Testing (manual)
+## Success criteria
 
-1. Open `/nslookup`, look up a known domain → summary + address rows with flags.
-2. Empty submit → validation, no crash.
-3. `/` and `/ip` unchanged.
-4. Direct load of `/nslookup` works (SPA fallback).
+1. as-ip serves `GET /api/v1/dns/lookup/example.com` with enriched `addresses`.
+2. `/nslookup` shows only **IP | ASN | AS | Country+Flag** after lookup.
+3. `/` and `/ip` unchanged; empty submit and API errors handled cleanly.
+4. Endpoint documented in as-ip `/api/v1/docs` and endpoint docs.
+
+## Manual test
+
+1. Deploy/run as-ip with DB sync; curl DNS lookup for `example.com` → `addresses` with ASN/country when known.
+2. Open asip-webui `/nslookup`, look up same domain → four-column grid with flag.
+3. Empty submit → validation; nonsense domain → error; `/` and `/ip` still work.

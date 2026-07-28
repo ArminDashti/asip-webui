@@ -35,9 +35,7 @@ export function HomePage() {
   }, [])
 
   return (
-    <main className="home">
-      <p className="brand">ASIP</p>
-
+    <div className="home">
       {loadState.status === 'loading' && (
         <p className="status" role="status">
           Looking up your IP…
@@ -53,7 +51,7 @@ export function HomePage() {
       {loadState.status === 'ready' && (
         <CallerIpSummary info={loadState.info} />
       )}
-    </main>
+    </div>
   )
 }
 

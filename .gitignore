@@ -1,6 +1,12 @@
+*.exe
+*.EXE
+
 node_modules
 dist
 .DS_Store
 *.local
 .env
 .env.*.local
+
+# --- auto: github-commit-push-all-repos ---
+# --- end auto ---

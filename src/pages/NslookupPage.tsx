@@ -45,9 +45,7 @@ export function NslookupPage() {
   }
 
   return (
-    <main className="home">
-      <p className="brand">ASIP</p>
-
+    <div className="home">
       <form className="ip-lookup-form" onSubmit={handleLookup}>
         <label className="ip-lookup-label" htmlFor="domain-name">
           Domain
@@ -90,7 +88,7 @@ export function NslookupPage() {
       {lookupState.status === 'ready' && (
         <DnsLookupSummary result={lookupState.result} />
       )}
-    </main>
+    </div>
   )
 }
 
@@ -114,10 +112,6 @@ function DnsLookupSummary({ result }: { result: DnsLookupResult }) {
           <dd>{joinRecordList(result.a)}</dd>
         </div>
         <div className="field">
-          <dt>NS</dt>
-          <dd>{joinRecordList(result.ns)}</dd>
-        </div>
-        <div className="field">
           <dt>CNAME</dt>
           <dd>{displayCname(result.cname)}</dd>
         </div>
@@ -136,6 +130,7 @@ function DnsLookupSummary({ result }: { result: DnsLookupResult }) {
       </dl>
 
       <DnsAddressesTable addresses={result.addresses} />
+      <DnsNsTable nameservers={result.ns} />
     </div>
   )
 }
@@ -143,16 +138,16 @@ function DnsLookupSummary({ result }: { result: DnsLookupResult }) {
 function DnsAddressesTable({ addresses }: { addresses: DnsAddress[] }) {
   if (addresses.length === 0) {
     return (
-      <p className="status dns-addresses-empty" role="status">
+      <p className="status dns-grid-empty" role="status">
         No addresses returned
       </p>
     )
   }
 
   return (
-    <div className="dns-addresses">
-      <h2 className="dns-addresses-heading">Addresses</h2>
-      <table className="dns-addresses-table">
+    <div className="dns-grid">
+      <h2 className="dns-grid-heading">Addresses</h2>
+      <table className="dns-grid-table">
         <thead>
           <tr>
             <th scope="col">IP</th>
@@ -189,5 +184,35 @@ function DnsAddressRow({ address }: { address: DnsAddress }) {
         <span>{address.country}</span>
       </td>
     </tr>
+  )
+}
+
+function DnsNsTable({ nameservers }: { nameservers: string[] }) {
+  if (nameservers.length === 0) {
+    return (
+      <p className="status dns-grid-empty" role="status">
+        No nameservers returned
+      </p>
+    )
+  }
+
+  return (
+    <div className="dns-grid">
+      <h2 className="dns-grid-heading">NS</h2>
+      <table className="dns-grid-table">
+        <thead>
+          <tr>
+            <th scope="col">NS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {nameservers.map((nameserver) => (
+            <tr key={nameserver}>
+              <td>{nameserver}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

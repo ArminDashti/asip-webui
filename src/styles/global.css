@@ -5,7 +5,7 @@
   --muted: #5a6874;
   --accent: #0f6b5c;
   --error: #9b2c2c;
-  --field-gap: 1.25rem;
+  --field-gap: 0.7rem;
   --font-display: 'Outfit', 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
@@ -19,11 +19,11 @@
 html,
 body,
 #root {
-  min-height: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 body {
-  margin: 0;
   color: var(--ink);
   font-family: var(--font-display);
   background:
@@ -31,24 +31,146 @@ body {
     linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
 }
 
+.app-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.site-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid rgba(26, 36, 46, 0.1);
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem 0.85rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.site-nav-link {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 0.2rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.site-nav-link:hover {
+  color: var(--ink);
+}
+
+.site-nav-link.is-active {
+  color: var(--accent);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+
+.site-logo {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.site-logo:hover {
+  filter: brightness(0.92);
+}
+
+.site-main {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.55rem 1.25rem 0.7rem;
+  border-top: 1px solid rgba(26, 36, 46, 0.1);
+}
+
+.site-footer-github {
+  display: inline-flex;
+  color: var(--ink);
+  line-height: 0;
+}
+
+.site-footer-github:hover {
+  color: var(--accent);
+}
+
+.site-footer-github-icon {
+  display: block;
+}
+
+.site-footer-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 .home {
-  min-height: 100vh;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1.25rem;
+  padding: 1rem 1.25rem;
   text-align: center;
   animation: rise 0.55s ease-out both;
 }
 
-.brand {
-  margin: 0 0 2rem;
-  font-size: clamp(2.5rem, 8vw, 3.75rem);
+.about-page {
+  gap: 0.85rem;
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.about-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 600;
-  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.about-body {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.about-github {
+  margin: 0;
+}
+
+.about-github a {
   color: var(--accent);
-  animation: fade-in 0.7s ease-out 0.1s both;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.about-github a:hover {
+  text-decoration: underline;
 }
 
 .status {
@@ -64,15 +186,15 @@ body {
 
 .ip-lookup-form {
   width: min(100%, 26rem);
-  margin: 0 0 2rem;
+  margin: 0 0 1rem;
   text-align: left;
   animation: fade-in 0.55s ease-out 0.1s both;
 }
 
 .ip-lookup-label {
   display: block;
-  margin: 0 0 0.45rem;
-  font-size: 0.75rem;
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -89,13 +211,13 @@ body {
   flex: 1;
   min-width: 0;
   margin: 0;
-  padding: 0.7rem 0.85rem;
+  padding: 0.55rem 0.75rem;
   border: 1px solid rgba(26, 36, 46, 0.18);
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.72);
   color: var(--ink);
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .ip-lookup-input:focus {
@@ -110,13 +232,13 @@ body {
 
 .ip-lookup-submit {
   margin: 0;
-  padding: 0.7rem 1rem;
+  padding: 0.55rem 0.9rem;
   border: none;
   border-radius: 6px;
   background: var(--accent);
   color: #fff;
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
@@ -141,13 +263,13 @@ body {
 }
 
 .flag-row {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
 }
 
 .country-flag {
   display: inline-block;
-  width: 3rem;
-  line-height: 2.25rem;
+  width: 2.25rem;
+  line-height: 1.7rem;
   border-radius: 3px;
   box-shadow: 0 1px 0 rgba(26, 36, 46, 0.12);
 }
@@ -155,13 +277,13 @@ body {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.1rem;
   min-width: min(100%, 22rem);
 }
 
 .field dt {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -171,7 +293,7 @@ body {
 .field dd {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: clamp(1.05rem, 3.5vw, 1.35rem);
+  font-size: clamp(0.95rem, 2.8vw, 1.15rem);
   font-weight: 500;
   word-break: break-word;
 }
@@ -181,17 +303,17 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
 }
 
-.dns-addresses {
+.dns-grid {
   width: 100%;
   animation: fade-in 0.55s ease-out 0.2s both;
 }
 
-.dns-addresses-heading {
-  margin: 0 0 0.75rem;
-  font-size: 0.75rem;
+.dns-grid-heading {
+  margin: 0 0 0.4rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -199,25 +321,25 @@ body {
   text-align: center;
 }
 
-.dns-addresses-table {
+.dns-grid-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
-.dns-addresses-table th,
-.dns-addresses-table td {
-  padding: 0.65rem 0.75rem;
+.dns-grid-table th,
+.dns-grid-table td {
+  padding: 0.4rem 0.55rem;
   border-bottom: 1px solid rgba(26, 36, 46, 0.12);
   vertical-align: middle;
   word-break: break-word;
 }
 
-.dns-addresses-table th {
+.dns-grid-table th {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -231,13 +353,13 @@ body {
 }
 
 .country-flag-inline {
-  width: 1.5rem;
-  line-height: 1.15rem;
+  width: 1.35rem;
+  line-height: 1.05rem;
   flex-shrink: 0;
 }
 
-.dns-addresses-empty {
-  margin-top: 0.5rem;
+.dns-grid-empty {
+  margin-top: 0.25rem;
 }
 
 @keyframes rise {
@@ -260,11 +382,21 @@ body {
   }
 }
 
+@media (max-width: 40rem) {
+  .site-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .site-nav {
+    flex-wrap: wrap;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home,
-  .brand,
   .ip-fields,
-  .dns-addresses {
+  .dns-grid {
     animation: none;
   }
 }

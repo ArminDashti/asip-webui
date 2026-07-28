@@ -32,9 +32,7 @@ export function IpPage() {
   }
 
   return (
-    <main className="home">
-      <p className="brand">ASIP</p>
-
+    <div className="home">
       <form className="ip-lookup-form" onSubmit={handleLookup}>
         <label className="ip-lookup-label" htmlFor="ip-address">
           IP address
@@ -77,7 +75,7 @@ export function IpPage() {
       {lookupState.status === 'ready' && (
         <LookedUpIpSummary info={lookupState.info} />
       )}
-    </main>
+    </div>
   )
 }
 
