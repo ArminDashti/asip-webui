@@ -176,6 +176,70 @@ body {
   word-break: break-word;
 }
 
+.dns-lookup-result {
+  width: min(100%, 48rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.dns-addresses {
+  width: 100%;
+  animation: fade-in 0.55s ease-out 0.2s both;
+}
+
+.dns-addresses-heading {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+
+.dns-addresses-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+
+.dns-addresses-table th,
+.dns-addresses-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid rgba(26, 36, 46, 0.12);
+  vertical-align: middle;
+  word-break: break-word;
+}
+
+.dns-addresses-table th {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dns-country-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.country-flag-inline {
+  width: 1.5rem;
+  line-height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.dns-addresses-empty {
+  margin-top: 0.5rem;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -199,7 +263,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .home,
   .brand,
-  .ip-fields {
+  .ip-fields,
+  .dns-addresses {
     animation: none;
   }
 }

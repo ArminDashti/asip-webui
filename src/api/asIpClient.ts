@@ -5,6 +5,27 @@ export type IpInfo = {
   country: string
 }
 
+export type DnsAddress = {
+  ip: string
+  asn: number
+  as: string
+  country: string
+}
+
+export type DnsLookupResult = {
+  domain: string
+  a: string[]
+  aaaa: string[]
+  ns: string[]
+  mx: unknown[]
+  txt: string[]
+  cname: string
+  asn: number
+  as: string
+  country: string
+  addresses: DnsAddress[]
+}
+
 type ApiErrorBody = {
   error?: string
   message?: string
@@ -18,21 +39,31 @@ function resolveApiBaseUrl(): string {
   return configured.replace(/\/$/, '')
 }
 
-async function readIpInfoResponse(response: Response): Promise<IpInfo> {
-  if (!response.ok) {
-    let detail = `HTTP ${response.status}`
-    try {
-      const body = (await response.json()) as ApiErrorBody
-      if (body.message) {
-        detail = body.message
-      }
-    } catch {
-      // keep status-based detail
-    }
-    throw new Error(detail)
+async function throwIfNotOk(response: Response): Promise<void> {
+  if (response.ok) {
+    return
   }
 
+  let detail = `HTTP ${response.status}`
+  try {
+    const body = (await response.json()) as ApiErrorBody
+    if (body.message) {
+      detail = body.message
+    }
+  } catch {
+    // keep status-based detail
+  }
+  throw new Error(detail)
+}
+
+async function readIpInfoResponse(response: Response): Promise<IpInfo> {
+  await throwIfNotOk(response)
   return (await response.json()) as IpInfo
+}
+
+async function readDnsLookupResponse(response: Response): Promise<DnsLookupResult> {
+  await throwIfNotOk(response)
+  return (await response.json()) as DnsLookupResult
 }
 
 export async function fetchIpInfo(): Promise<IpInfo> {
@@ -46,4 +77,12 @@ export async function fetchIpInfoByAddress(ipAddress: string): Promise<IpInfo> {
     `${resolveApiBaseUrl()}/ip/info/${encodeURIComponent(trimmed)}`,
   )
   return readIpInfoResponse(response)
+}
+
+export async function fetchDnsLookup(domain: string): Promise<DnsLookupResult> {
+  const trimmed = domain.trim()
+  const response = await fetch(
+    `${resolveApiBaseUrl()}/dns/lookup/${encodeURIComponent(trimmed)}`,
+  )
+  return readDnsLookupResponse(response)
 }
