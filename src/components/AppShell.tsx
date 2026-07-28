@@ -70,6 +70,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <p className="site-footer-copy">
           © 2026 Dashti Technologies (Armin Dashti)
         </p>
+        <span className="site-footer-spacer" aria-hidden="true" />
       </footer>
     </div>
   )

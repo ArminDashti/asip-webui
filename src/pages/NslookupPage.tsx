@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import {
   fetchDnsLookup,
   type DnsAddress,
@@ -12,13 +12,40 @@ type LookupState =
   | { status: 'ready'; result: DnsLookupResult }
   | { status: 'error'; message: string }
 
-function joinRecordList(values: string[]): string {
-  return values.length > 0 ? values.join(', ') : '—'
+type NsRow = {
+  ns: string
+  ip: string
+  as: string
+  asn: string
+  country: string
 }
 
-function displayCname(cname: string): string {
-  const trimmed = cname.trim()
-  return trimmed.length > 0 ? trimmed : '—'
+type NsResolveState =
+  | { status: 'loading' }
+  | { status: 'ready'; rows: NsRow[] }
+
+function displayOrDash(value: string | number | undefined | null): string {
+  if (value === undefined || value === null) {
+    return '—'
+  }
+  const text = String(value).trim()
+  return text.length > 0 ? text : '—'
+}
+
+function mapDnsLookupToNsRow(nameserver: string, lookup: DnsLookupResult): NsRow {
+  const primaryAddress = lookup.addresses[0]
+  const ip = primaryAddress?.ip || lookup.a[0]
+  const asName = primaryAddress?.as ?? lookup.as
+  const asn = primaryAddress?.asn ?? lookup.asn
+  const country = primaryAddress?.country ?? lookup.country
+
+  return {
+    ns: nameserver,
+    ip: displayOrDash(ip),
+    as: displayOrDash(asName),
+    asn: displayOrDash(asn),
+    country: displayOrDash(country),
+  }
 }
 
 export function NslookupPage() {
@@ -94,40 +121,16 @@ export function NslookupPage() {
 
 function DnsLookupSummary({ result }: { result: DnsLookupResult }) {
   const flagClassName = buildCountryFlagClassName(result.country)
+  const countryLabel = displayOrDash(result.country)
 
   return (
     <div className="dns-lookup-result">
-      <dl className="ip-fields">
+      <div className="dns-result-country">
         {flagClassName && (
-          <div className="flag-row">
-            <span className={`country-flag ${flagClassName}`} aria-hidden="true" />
-          </div>
+          <span className={`country-flag ${flagClassName}`} aria-hidden="true" />
         )}
-        <div className="field">
-          <dt>Domain</dt>
-          <dd>{result.domain}</dd>
-        </div>
-        <div className="field">
-          <dt>A</dt>
-          <dd>{joinRecordList(result.a)}</dd>
-        </div>
-        <div className="field">
-          <dt>CNAME</dt>
-          <dd>{displayCname(result.cname)}</dd>
-        </div>
-        <div className="field">
-          <dt>ASN</dt>
-          <dd>{result.asn}</dd>
-        </div>
-        <div className="field">
-          <dt>AS</dt>
-          <dd>{result.as}</dd>
-        </div>
-        <div className="field">
-          <dt>Country</dt>
-          <dd>{result.country}</dd>
-        </div>
-      </dl>
+        <span className="dns-result-country-name">{countryLabel}</span>
+      </div>
 
       <DnsAddressesTable addresses={result.addresses} />
       <DnsNsTable nameservers={result.ns} />
@@ -147,21 +150,23 @@ function DnsAddressesTable({ addresses }: { addresses: DnsAddress[] }) {
   return (
     <div className="dns-grid">
       <h2 className="dns-grid-heading">Addresses</h2>
-      <table className="dns-grid-table">
-        <thead>
-          <tr>
-            <th scope="col">IP</th>
-            <th scope="col">AS</th>
-            <th scope="col">ASN</th>
-            <th scope="col">Country</th>
-          </tr>
-        </thead>
-        <tbody>
-          {addresses.map((address) => (
-            <DnsAddressRow key={address.ip} address={address} />
-          ))}
-        </tbody>
-      </table>
+      <div className="dns-grid-scroll">
+        <table className="dns-grid-table">
+          <thead>
+            <tr>
+              <th scope="col">IP</th>
+              <th scope="col">AS</th>
+              <th scope="col">ASN</th>
+              <th scope="col">Country</th>
+            </tr>
+          </thead>
+          <tbody>
+            {addresses.map((address) => (
+              <DnsAddressRow key={address.ip} address={address} />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
@@ -188,6 +193,58 @@ function DnsAddressRow({ address }: { address: DnsAddress }) {
 }
 
 function DnsNsTable({ nameservers }: { nameservers: string[] }) {
+  const [resolveState, setResolveState] = useState<NsResolveState>({
+    status: 'loading',
+  })
+
+  const nameserverKey = nameservers.join('\n')
+
+  useEffect(() => {
+    let isActive = true
+    const nameserverList = nameserverKey.length > 0 ? nameserverKey.split('\n') : []
+
+    if (nameserverList.length === 0) {
+      setResolveState({ status: 'ready', rows: [] })
+      return () => {
+        isActive = false
+      }
+    }
+
+    setResolveState({ status: 'loading' })
+
+    async function resolveNameservers() {
+      const settled = await Promise.allSettled(
+        nameserverList.map((nameserver) => fetchDnsLookup(nameserver)),
+      )
+
+      if (!isActive) {
+        return
+      }
+
+      const rows = settled.map((outcome, index) => {
+        const nameserver = nameserverList[index]
+        if (outcome.status === 'fulfilled') {
+          return mapDnsLookupToNsRow(nameserver, outcome.value)
+        }
+        return {
+          ns: nameserver,
+          ip: '—',
+          as: '—',
+          asn: '—',
+          country: '—',
+        }
+      })
+
+      setResolveState({ status: 'ready', rows })
+    }
+
+    void resolveNameservers()
+
+    return () => {
+      isActive = false
+    }
+  }, [nameserverKey])
+
   if (nameservers.length === 0) {
     return (
       <p className="status dns-grid-empty" role="status">
@@ -199,20 +256,55 @@ function DnsNsTable({ nameservers }: { nameservers: string[] }) {
   return (
     <div className="dns-grid">
       <h2 className="dns-grid-heading">NS</h2>
-      <table className="dns-grid-table">
-        <thead>
-          <tr>
-            <th scope="col">NS</th>
-          </tr>
-        </thead>
-        <tbody>
-          {nameservers.map((nameserver) => (
-            <tr key={nameserver}>
-              <td>{nameserver}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {resolveState.status === 'loading' && (
+        <p className="status dns-grid-empty" role="status">
+          Looking up nameservers…
+        </p>
+      )}
+      {resolveState.status === 'ready' && (
+        <div className="dns-grid-scroll">
+          <table className="dns-grid-table">
+            <thead>
+              <tr>
+                <th scope="col">NS</th>
+                <th scope="col">IP</th>
+                <th scope="col">AS</th>
+                <th scope="col">ASN</th>
+                <th scope="col">Country</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resolveState.rows.map((row) => (
+                <DnsNsRow key={row.ns} row={row} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
+  )
+}
+
+function DnsNsRow({ row }: { row: NsRow }) {
+  const flagClassName = buildCountryFlagClassName(
+    row.country === '—' ? '' : row.country,
+  )
+
+  return (
+    <tr>
+      <td>{row.ns}</td>
+      <td>{row.ip}</td>
+      <td>{row.as}</td>
+      <td>{row.asn}</td>
+      <td className="dns-country-cell">
+        {flagClassName && (
+          <span
+            className={`country-flag country-flag-inline ${flagClassName}`}
+            aria-hidden="true"
+          />
+        )}
+        <span>{row.country}</span>
+      </td>
+    </tr>
   )
 }

@@ -44,7 +44,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.65rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   border-bottom: 1px solid rgba(26, 36, 46, 0.1);
 }
 
@@ -62,8 +62,11 @@ body {
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
-  padding: 0.2rem 0;
+  padding: 0.45rem 0.15rem;
   border-bottom: 2px solid transparent;
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .site-nav-link:hover {
@@ -99,18 +102,23 @@ body {
 
 .site-footer {
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-  padding: 0.55rem 1.25rem 0.7rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem 0.8rem;
   border-top: 1px solid rgba(26, 36, 46, 0.1);
 }
 
 .site-footer-github {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--ink);
   line-height: 0;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  justify-self: start;
 }
 
 .site-footer-github:hover {
@@ -125,6 +133,15 @@ body {
   margin: 0;
   color: var(--muted);
   font-size: 0.8rem;
+  text-align: center;
+  justify-self: center;
+}
+
+.site-footer-spacer {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+  justify-self: end;
 }
 
 .home {
@@ -299,11 +316,25 @@ body {
 }
 
 .dns-lookup-result {
-  width: min(100%, 48rem);
+  width: min(100%, 52rem);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.15rem;
+}
+
+.dns-result-country {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  animation: fade-in 0.55s ease-out 0.15s both;
+}
+
+.dns-result-country-name {
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-weight: 500;
 }
 
 .dns-grid {
@@ -312,7 +343,7 @@ body {
 }
 
 .dns-grid-heading {
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.45rem;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -321,8 +352,18 @@ body {
   text-align: center;
 }
 
+.dns-grid-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(26, 36, 46, 0.08);
+}
+
 .dns-grid-table {
   width: 100%;
+  min-width: 28rem;
   border-collapse: collapse;
   text-align: left;
   font-family: var(--font-mono);
@@ -331,10 +372,14 @@ body {
 
 .dns-grid-table th,
 .dns-grid-table td {
-  padding: 0.4rem 0.55rem;
-  border-bottom: 1px solid rgba(26, 36, 46, 0.12);
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid rgba(26, 36, 46, 0.1);
   vertical-align: middle;
   word-break: break-word;
+}
+
+.dns-grid-table tr:last-child td {
+  border-bottom: none;
 }
 
 .dns-grid-table th {
@@ -344,6 +389,9 @@ body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
+  background: rgba(255, 255, 255, 0.35);
+  position: sticky;
+  top: 0;
 }
 
 .dns-country-cell {
@@ -386,17 +434,58 @@ body {
   .site-header {
     flex-wrap: wrap;
     gap: 0.5rem;
+    padding: 0.65rem 1rem;
   }
 
   .site-nav {
     flex-wrap: wrap;
+    gap: 0.15rem 0.65rem;
+  }
+
+  .site-footer {
+    gap: 0.5rem;
+    padding: 0.55rem 1rem 0.7rem;
+  }
+
+  .site-footer-copy {
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .home {
+    padding: 0.85rem 1rem;
+    justify-content: flex-start;
+  }
+
+  .ip-lookup-form {
+    width: 100%;
+  }
+
+  .ip-lookup-input,
+  .ip-lookup-submit {
+    min-height: 2.75rem;
+  }
+
+  .dns-lookup-result {
+    gap: 0.95rem;
+  }
+
+  .dns-grid-table {
+    min-width: 32rem;
+    font-size: 0.8rem;
+  }
+
+  .dns-grid-table th,
+  .dns-grid-table td {
+    padding: 0.5rem 0.55rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .home,
   .ip-fields,
-  .dns-grid {
+  .dns-grid,
+  .dns-result-country {
     animation: none;
   }
 }
