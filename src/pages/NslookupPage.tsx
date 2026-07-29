@@ -32,6 +32,10 @@ function displayOrDash(value: string | number | undefined | null): string {
   return text.length > 0 ? text : '—'
 }
 
+function joinRecordList(values: string[]): string {
+  return values.length > 0 ? values.join(', ') : '—'
+}
+
 function mapDnsLookupToNsRow(nameserver: string, lookup: DnsLookupResult): NsRow {
   const primaryAddress = lookup.addresses[0]
   const ip = primaryAddress?.ip || lookup.a[0]
@@ -121,16 +125,32 @@ export function NslookupPage() {
 
 function DnsLookupSummary({ result }: { result: DnsLookupResult }) {
   const flagClassName = buildCountryFlagClassName(result.country)
-  const countryLabel = displayOrDash(result.country)
 
   return (
     <div className="dns-lookup-result">
-      <div className="dns-result-country">
+      <dl className="ip-fields">
         {flagClassName && (
-          <span className={`country-flag ${flagClassName}`} aria-hidden="true" />
+          <div className="flag-row">
+            <span className={`country-flag ${flagClassName}`} aria-hidden="true" />
+          </div>
         )}
-        <span className="dns-result-country-name">{countryLabel}</span>
-      </div>
+        <div className="field">
+          <dt>IP</dt>
+          <dd>{joinRecordList(result.a)}</dd>
+        </div>
+        <div className="field">
+          <dt>ASN</dt>
+          <dd>{displayOrDash(result.asn)}</dd>
+        </div>
+        <div className="field">
+          <dt>AS</dt>
+          <dd>{displayOrDash(result.as)}</dd>
+        </div>
+        <div className="field">
+          <dt>Country</dt>
+          <dd>{displayOrDash(result.country)}</dd>
+        </div>
+      </dl>
 
       <DnsAddressesTable addresses={result.addresses} />
       <DnsNsTable nameservers={result.ns} />
@@ -149,14 +169,13 @@ function DnsAddressesTable({ addresses }: { addresses: DnsAddress[] }) {
 
   return (
     <div className="dns-grid">
-      <h2 className="dns-grid-heading">Addresses</h2>
       <div className="dns-grid-scroll">
         <table className="dns-grid-table">
           <thead>
             <tr>
               <th scope="col">IP</th>
-              <th scope="col">AS</th>
               <th scope="col">ASN</th>
+              <th scope="col">AS</th>
               <th scope="col">Country</th>
             </tr>
           </thead>
@@ -177,8 +196,8 @@ function DnsAddressRow({ address }: { address: DnsAddress }) {
   return (
     <tr>
       <td>{address.ip}</td>
-      <td>{address.as}</td>
-      <td>{address.asn}</td>
+      <td>{displayOrDash(address.asn)}</td>
+      <td>{displayOrDash(address.as)}</td>
       <td className="dns-country-cell">
         {flagClassName && (
           <span
@@ -186,7 +205,7 @@ function DnsAddressRow({ address }: { address: DnsAddress }) {
             aria-hidden="true"
           />
         )}
-        <span>{address.country}</span>
+        <span>{displayOrDash(address.country)}</span>
       </td>
     </tr>
   )
@@ -255,7 +274,6 @@ function DnsNsTable({ nameservers }: { nameservers: string[] }) {
 
   return (
     <div className="dns-grid">
-      <h2 className="dns-grid-heading">NS</h2>
       {resolveState.status === 'loading' && (
         <p className="status dns-grid-empty" role="status">
           Looking up nameservers…
@@ -268,8 +286,8 @@ function DnsNsTable({ nameservers }: { nameservers: string[] }) {
               <tr>
                 <th scope="col">NS</th>
                 <th scope="col">IP</th>
-                <th scope="col">AS</th>
                 <th scope="col">ASN</th>
+                <th scope="col">AS</th>
                 <th scope="col">Country</th>
               </tr>
             </thead>
@@ -294,8 +312,8 @@ function DnsNsRow({ row }: { row: NsRow }) {
     <tr>
       <td>{row.ns}</td>
       <td>{row.ip}</td>
-      <td>{row.as}</td>
       <td>{row.asn}</td>
+      <td>{row.as}</td>
       <td className="dns-country-cell">
         {flagClassName && (
           <span
